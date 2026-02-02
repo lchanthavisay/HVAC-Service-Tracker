@@ -6,11 +6,47 @@ import NewServiceRecordView from './components/NewServiceRecordView';
 import HistoryView from './components/HistoryView';
 import ScannerView from './components/ScannerView';
 import { TABS, HVAC_UNITS } from './constants';
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCQrqJa-6fvt3KwTI5hx9elxr0qCJgTBE4",
+  authDomain: "hvac-service-tracker.firebaseapp.com",
+  projectId: "hvac-service-tracker",
+  storageBucket: "hvac-service-tracker.firebasestorage.app",
+  messagingSenderId: "489586619585",
+  appId: "1:489586619585:web:6c102dfb20e4e8f5591040"
+};
+
+// Initialize Firebase services
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>(ViewType.MANUALS);
   const [selectedUnitId, setSelectedUnitId] = useState(HVAC_UNITS[0].id);
 
+  const handleSaveRecord = async (model: string, serial: string, photo: File) => {
+    try {
+      const photoRef = ref(storage, `hvac_records/${Date.now()}_${photo.name}`);
+      const uploadResult = await uploadBytes(photoRef, photo);
+      const url = await getDownloadURL(uploadResult.ref);
+
+      await addDoc(collection(db, "service_calls"), {
+        modelNumber: model,
+        serialNumber: serial,
+        imageUrl: url,
+        timestamp: new Date()
+      });
+
+      alert("Record saved to Firebase!");
+    } catch (e) {
+      console.error("Error saving:", e);
+    }
+  };
+  
   const renderView = () => {
     switch (currentView) {
       case ViewType.MANUALS:
