@@ -1,0 +1,7 @@
+{
+  "name": "HVAC Service Pro",
+  "description": "A professional maintenance and documentation management application for HVAC technicians to track service records and access equipment manuals.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
