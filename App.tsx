@@ -28,24 +28,32 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>(ViewType.MANUALS);
   const [selectedUnitId, setSelectedUnitId] = useState(HVAC_UNITS[0].id);
 
-  const handleSaveRecord = async (model: string, serial: string, photo: File) => {
-    try {
-      const photoRef = ref(storage, `hvac_records/${Date.now()}_${photo.name}`);
-      const uploadResult = await uploadBytes(photoRef, photo);
-      const url = await getDownloadURL(uploadResult.ref);
+  const handleSaveRecord = async (unitId: string, notes: string, photoData: string) => {
+  try {
+    let imageUrl = "";
 
-      await addDoc(collection(db, "service_calls"), {
-        modelNumber: model,
-        serialNumber: serial,
-        imageUrl: url,
-        timestamp: new Date()
-      });
-
-      alert("Record saved to Firebase!");
-    } catch (e) {
-      console.error("Error saving:", e);
+    // 1. If there is a photo, upload it to Firebase Storage
+    if (photoData) {
+      const photoRef = ref(storage, `hvac_records/${Date.now()}.jpg`);
+      // Convert the string photo into a blob format Firebase understands
+      const snapshot = await uploadBytes(photoRef, await (await fetch(photoData)).blob());
+      imageUrl = await getDownloadURL(snapshot.ref);
     }
-  };
+
+    // 2. Save everything to the Firestore Database
+    await addDoc(collection(db, "service_calls"), {
+      unitId: unitId,
+      technicianNotes: notes,
+      photoUrl: imageUrl,
+      timestamp: new Date()
+    });
+
+    alert("Service Record Saved Successfully!");
+  } catch (e) {
+    console.error("Firebase Error:", e);
+    alert("Save failed. Check your Firebase console.");
+  }
+};
   
   const renderView = () => {
     switch (currentView) {
