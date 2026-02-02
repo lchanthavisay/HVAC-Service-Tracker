@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 
 interface NewServiceRecordViewProps {
   selectedUnitId: string;
-  onSave: () => void;
+  onSave: (model: string, serial: string, photo: File) => void;
 }
 
 const NewServiceRecordView: React.FC<NewServiceRecordViewProps> = ({ selectedUnitId, onSave }) => {
@@ -115,7 +115,7 @@ const NewServiceRecordView: React.FC<NewServiceRecordViewProps> = ({ selectedUni
 
       <footer className="fixed bottom-0 max-w-md w-full p-4 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 z-50">
         <button 
-          onClick={onSave}
+          onClick={() => onSave(selectedUnitId, notes, photos[0])}
           className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] ios-shadow"
         >
           <span className="material-symbols-outlined">save</span>
